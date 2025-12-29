@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # MinIO - S3-compatible object storage
+  minio:
+    image: minio/minio:latest
+    container_name: cx-anomaly-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"  # Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - cx-anomaly-network
+
+  # CX Anomaly Detector API
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: cx-anomaly-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=docker
+      - CONFIG_PATH=/app/configs/config.local.yaml
+      - LOG_LEVEL=INFO
+      - USE_S3=false
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_SECURE=false
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    volumes:
+      # Mount data and model directories for persistence
+      - ../data:/app/data
+      - ../models:/app/models
+      - ../configs:/app/configs
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - cx-anomaly-network
+    restart: unless-stopped
+
+volumes:
+  minio_data:
+    driver: local
+
+networks:
+  cx-anomaly-network:
+    driver: bridge

@@ -1,0 +1,84 @@
+# CX Anomaly Detector Configuration
+
+# Data paths
+data:
+  train_path: "./data/input/mock_train.csv"
+  inference_path: "./data/input/mock_inference.csv"
+  output_dir: "./data/processed"
+
+# Model artifacts
+artifacts:
+  dir: "./models/artifacts"
+  preprocessor: "preprocessor.joblib"
+  # Model-specific artifacts (model_{name}.joblib, meta_{name}.joblib)
+  model_template: "model_{name}.joblib"
+  meta_template: "meta_{name}.joblib"
+
+# Features configuration
+features:
+  numeric:
+    - csat
+    - ies
+    - complaints
+    - aht_seconds
+    - hold_time_seconds
+    - transfers
+  categorical:
+    - channel
+    - language
+    - queue
+  drop_columns:
+    - interaction_id
+    - timestamp
+  # Columns to exclude from training but keep in output
+  identifier_columns:
+    - interaction_id
+    - timestamp
+
+# Preprocessing
+preprocessing:
+  numeric_strategy: "mean"  # imputation strategy: mean, median, constant
+  scale_method: "standard"  # standard or minmax
+  categorical_unknown: "ignore"  # handle unknown categories
+
+# Multi-model configuration
+models:
+  - name: "iforest"
+    algorithm: "IsolationForest"
+    params:
+      n_estimators: 300
+      max_samples: "auto"
+      contamination: 0.03  # expected proportion of anomalies
+      random_state: 42
+      n_jobs: -1
+    threshold_percentile: 97
+  
+  - name: "lof"
+    algorithm: "LOF"
+    params:
+      n_neighbors: 35
+      contamination: 0.03
+      novelty: True
+      metric: "minkowski"
+    threshold_percentile: 97
+
+# Ensemble configuration
+ensemble:
+  strategy: "average"  # average, max, voting
+  weights:
+    iforest: 0.5
+    lof: 0.5
+
+# Evaluation
+evaluation:
+  plot_output: "./data/processed/score_distribution.png"
+  bins: 50
+
+# Batch scoring
+batch:
+  chunk_size: 1000
+  anomaly_threshold_from_training: true  # use training threshold vs. config
+
+# API
+api:
+  model_reload_interval: 3600  # seconds, 0 = no reload
