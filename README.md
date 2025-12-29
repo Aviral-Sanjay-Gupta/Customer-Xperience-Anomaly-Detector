@@ -3,6 +3,7 @@
 An end-to-end anomaly detection system for Customer Experience (CX) metrics. This project combines a robust Python-based Machine Learning backend with a modern, interactive React frontend to identify and visualize unusual patterns in customer interactions.
 
 ## 🚀 Overview
+![CX Anomaly Detector Home Page](cx-anomaly-frontend/public/CX-AD%20Widget%20Home%20Page.png)
 
 The **CX Anomaly Detector** monitors key metrics such as CSAT (Customer Satisfaction), AHT (Average Handle Time), and Transfer Rates. It uses a **multi-model ensemble** approach (Isolation Forest + Robust Random Cut Forest) to flag anomalies in real-time, helping support teams proactively address service quality issues.
 
@@ -103,14 +104,3 @@ CX-AD Widget/
 2.  **Scoring**: The API (`POST /score`) accepts JSON payloads of interaction data.
 3.  **Visualization**: Use the Frontend dashboard to view real-time streams of scored transactions and investigate flagged anomalies.
 
-## 🤝 Contributing
-
-1.  Fork the repository.
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
-
-## 📜 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
